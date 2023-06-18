@@ -18,12 +18,15 @@ enum UnitType: String, CaseIterable, Identifiable {
     case Liters = "Liters"
     case Ounces = "Ounces"
 }
+    
 
 struct ContentView: View {
     @AppStorage("CURRENT_LEVEL_KEY") var waterLevel: Double = 0
     @AppStorage("AMOUNT_TO_ADD_KEY") var amountToAdd: String = ""
     @AppStorage("GOAL_KEY") var dailyGoal: String = "3L"
     @AppStorage("SETTINGS_UNITS_KEY") var unitPickerSelection: UnitType = UnitType.Liters
+
+    @State private var showWarningBox: Bool = false
     
     @Environment(\.scenePhase) private var scenePhase
     
@@ -53,7 +56,19 @@ struct ContentView: View {
                                         }
                                     }
                                     TextField("Daily Goal", text: $dailyGoal)
+                                    Button("Reset Today's Progress", role: .destructive) {
+                                        self.showWarningBox = true
+                                    }
                                 }
+                            }
+                        }
+                        .alert("Are you sure?", isPresented: $showWarningBox) {
+                            Button("Delete Data", role: .destructive) {
+                                waterLevel = 0
+                            }
+                            
+                            Button("Cancel", role: .cancel) {
+                                self.showWarningBox = false
                             }
                         }
                     } label: {
@@ -83,7 +98,9 @@ struct ContentView: View {
                     .frame(height: 50)
                 HStack {
                     Button {
-                        waterLevel -= strip_of_unit(input: amountToAdd)
+                        if (amountToAdd != "") {
+                            waterLevel -= strip_of_unit(input: amountToAdd)
+                        }
                     } label: {
                         Text("-")
                             .padding(5)
@@ -101,7 +118,9 @@ struct ContentView: View {
                     .font(.system(size: 25))
                     
                     Button {
-                        waterLevel += strip_of_unit(input: amountToAdd)
+                        if (amountToAdd != "") {
+                            waterLevel += strip_of_unit(input: amountToAdd)
+                        }
                     } label: {
                         Text("+")
                             .padding(5)
@@ -138,11 +157,11 @@ func format_string(input: Double, selection: UnitType) -> String {
 /// Does the opposite to `format_string()`, strips away all units and returns the clean Double
 func strip_of_unit(input: String) -> Double {
     if (input.hasSuffix("ml")) {
-        return Double(input.replacingOccurrences(of: "ml", with: ""))!
+        return Double(input.replacingOccurrences(of: "ml", with: "").replacingOccurrences(of: ",", with: "."))!
     } else if (input.hasSuffix("L")) {
-        return Double(input.replacingOccurrences(of: "L", with: ""))!
+        return Double(Double(input.replacingOccurrences(of: "L", with: "").replacingOccurrences(of: ",", with: "."))! * 1000)
     } else if (input.hasSuffix("oz")) {
-        return Double(Double(input.replacingOccurrences(of: "oz", with: ""))! * 29.574)
+        return Double(Double(input.replacingOccurrences(of: "oz", with: "").replacingOccurrences(of: ",", with: "."))! * 29.574)
     } else {
         return 3000.0
     }
