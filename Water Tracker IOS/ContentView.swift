@@ -25,6 +25,7 @@ struct ContentView: View {
     @AppStorage("AMOUNT_TO_ADD_KEY") var amountToAdd: String = ""
     @AppStorage("GOAL_KEY") var dailyGoal: String = "3L"
     @AppStorage("SETTINGS_UNITS_KEY") var unitPickerSelection: UnitType = UnitType.Liters
+    @AppStorage("LAST_USED_DATE_KEY") var lastUsedDate: String = String(NSDate().timeIntervalSince1970)
 
     @State private var showWarningBox: Bool = false
     
@@ -130,6 +131,18 @@ struct ContentView: View {
                     .font(.system(size: 25))
                 }
                 Spacer()
+            }
+            .onAppear {
+                let formatter = DateFormatter()
+                    formatter.dateFormat = "dd"
+                
+                let earlierDay = formatter.string(from: Date(timeIntervalSince1970: Double(lastUsedDate)!))
+                let today = formatter.string(from: Date(timeIntervalSince1970: Double(NSDate().timeIntervalSince1970)))
+                
+                if (earlierDay != today) {
+                    waterLevel = 0
+                }
+                lastUsedDate = String(NSDate().timeIntervalSince1970)
             }
         }
     }
