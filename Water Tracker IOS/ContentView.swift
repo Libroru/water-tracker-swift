@@ -89,10 +89,10 @@ struct ContentView: View {
                 
                 ZStack {
                     CircularProgressBar(progress: {
-                        (waterLevel / strip_of_unit(input: dailyGoal))
+                        (waterLevel / stripOfUnit(input: dailyGoal))
                     }(), strokeWidth: 20, progressColor: Color.blue, backdropColor: Color.cyan)
                         .frame(width: 200)
-                    Text(format_string(input: waterLevel, selection: unitPickerSelection))
+                    Text(formatString(input: waterLevel, selection: unitPickerSelection))
                         .font(.system(size: 35))
                 }
                 Spacer()
@@ -100,7 +100,7 @@ struct ContentView: View {
                 HStack {
                     Button {
                         if (amountToAdd != "") {
-                            waterLevel -= strip_of_unit(input: amountToAdd)
+                            waterLevel -= stripOfUnit(input: amountToAdd)
                         }
                     } label: {
                         Text("-")
@@ -120,7 +120,7 @@ struct ContentView: View {
                     
                     Button {
                         if (amountToAdd != "") {
-                            waterLevel += strip_of_unit(input: amountToAdd)
+                            waterLevel += stripOfUnit(input: amountToAdd)
                         }
                     } label: {
                         Text("+")
@@ -155,32 +155,44 @@ struct ContentView_Previews: PreviewProvider {
 }
 
 /// Adds units to the `input` variable and returns a string with added units
-func format_string(input: Double, selection: UnitType) -> String {
-    if (selection == UnitType.Liters) {
-        if ((input / 1000) >= 1.0) {
-            return String(format: "%3.1f", input / 1000) + "L"
-        } else {
-            return String(format: "%3.0f", input) + "ml"
+/// Credits: BingAI for refactoring this code to perfection
+func formatString(input: Double, selection: UnitType) -> String {
+    let conversionFactors: [UnitType: (threshold: Double, factor: Double, unit: String)] = [
+        .Liters: (1000, 1000, "L"),
+        .Ounces: (1, 29.574, "oz")
+    ]
+    
+    if let conversion = conversionFactors[selection] {
+        if input >= conversion.threshold {
+            return String(format: "%3.1f", input / conversion.factor) + conversion.unit
         }
-    } else {
-        return String(format: "%3.1f", input / 29.574) + "oz"
     }
+    
+    return String(format: "%3.0f", input) + "ml"
 }
 
-/// Does the opposite to `format_string()`, strips away all units and returns the clean Double
-func strip_of_unit(input: String) -> Double {
-    if (input.hasSuffix("ml")) {
-        return Double(input.replacingOccurrences(of: "ml", with: "").replacingOccurrences(of: ",", with: "."))!
-    } else if (input.hasSuffix("L")) {
-        return Double(Double(input.replacingOccurrences(of: "L", with: "").replacingOccurrences(of: ",", with: "."))! * 1000)
-    } else if (input.hasSuffix("oz")) {
-        return Double(Double(input.replacingOccurrences(of: "oz", with: "").replacingOccurrences(of: ",", with: "."))! * 29.574)
-    } else {
-        @AppStorage("SETTINGS_UNITS_KEY") var unitPickerSelection: UnitType = UnitType.Liters
-        if (unitPickerSelection == UnitType.Liters) {
-            return Double(input)!
-        } else {
-            return Double(Double(input)! * 29.574)
+
+/// Does the opposite to `formatString()`, strips away all units and returns the clean Double
+/// Credits: BingAI for refactoring this code to perfection
+func stripOfUnit(input: String) -> Double {
+    let input = input.replacingOccurrences(of: ",", with: ".")
+    @AppStorage("SETTINGS_UNITS_KEY") var unitPickerSelection: UnitType = UnitType.Liters
+    
+    let conversionFactors: [String: Double] = [
+        "ml": 1,
+        "L": 1000,
+        "oz": 29.574,
+        "": unitPickerSelection == .Liters ? 1 : 29.574
+    ]
+    
+    for (unit, factor) in conversionFactors {
+        if input.hasSuffix(unit) {
+            let valueString = input.replacingOccurrences(of: unit, with: "")
+            if let value = Double(valueString) {
+                return value * factor
+            }
         }
     }
+        
+    return 0
 }
