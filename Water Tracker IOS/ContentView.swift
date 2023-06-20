@@ -176,6 +176,11 @@ func strip_of_unit(input: String) -> Double {
     } else if (input.hasSuffix("oz")) {
         return Double(Double(input.replacingOccurrences(of: "oz", with: "").replacingOccurrences(of: ",", with: "."))! * 29.574)
     } else {
-        return 3000.0
+        @AppStorage("SETTINGS_UNITS_KEY") var unitPickerSelection: UnitType = UnitType.Liters
+        if (unitPickerSelection == UnitType.Liters) {
+            return Double(input)!
+        } else {
+            return Double(Double(input)! * 29.574)
+        }
     }
 }
