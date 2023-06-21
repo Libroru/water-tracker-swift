@@ -26,6 +26,10 @@ struct ContentView: View {
     @AppStorage("GOAL_KEY") var dailyGoal: String = "3L"
     @AppStorage("SETTINGS_UNITS_KEY") var unitPickerSelection: UnitType = UnitType.Liters
     @AppStorage("LAST_USED_DATE_KEY") var lastUsedDate: String = String(NSDate().timeIntervalSince1970)
+    
+    @AppStorage("FIRST_BUTTON_KEY") var firstPresetButton: String = "150ml"
+    @AppStorage("SECOND_BUTTON_KEY") var secondPresetButton: String = "250ml"
+    @AppStorage("THIRD_BUTTON_KEY") var thirdPresetButton: String = "500ml"
 
     @State private var showWarningBox: Bool = false
     
@@ -57,6 +61,9 @@ struct ContentView: View {
                                         }
                                     }
                                     TextField("Daily Goal", text: $dailyGoal)
+                                    TextField("Preset Button 1", text: $firstPresetButton)
+                                    TextField("Preset Button 2", text: $secondPresetButton)
+                                    TextField("Preset Button 3", text: $thirdPresetButton)
                                     Button("Reset Today's Progress", role: .destructive) {
                                         self.showWarningBox = true
                                     }
@@ -97,38 +104,59 @@ struct ContentView: View {
                 }
                 Spacer()
                     .frame(height: 50)
-                HStack {
-                    Button {
-                        if (amountToAdd != "") {
-                            waterLevel -= stripOfUnit(input: amountToAdd)
+                VStack{
+                    HStack {
+                        Button {
+                            if (amountToAdd != "") {
+                                waterLevel -= stripOfUnit(input: amountToAdd)
+                            }
+                        } label: {
+                            Text("-")
+                                .padding(5)
+                                .frame(width: 30)
                         }
-                    } label: {
-                        Text("-")
-                            .padding(5)
-                            .frame(width: 30)
-                    }
-                    .buttonStyle(BorderedProminentButtonStyle())
-                    .font(.system(size: 25))
-                    
-                    TextField(text: $amountToAdd,
-                              prompt: Text(unitPickerSelection == UnitType.Liters ? "500ml" : "16oz")) {
-                        Text("Amount")
-                    }
-                    .frame(width: 125, height: 45)
-                    .multilineTextAlignment(.center)
-                    .font(.system(size: 25))
-                    
-                    Button {
-                        if (amountToAdd != "") {
-                            waterLevel += stripOfUnit(input: amountToAdd)
+                        .buttonStyle(BorderedProminentButtonStyle())
+                        .font(.system(size: 25))
+                        
+                        TextField(text: $amountToAdd,
+                                  prompt: Text(unitPickerSelection == UnitType.Liters ? "500ml" : "16oz")) {
+                            Text("Amount")
                         }
-                    } label: {
-                        Text("+")
-                            .padding(5)
-                            .frame(width: 30)
+                        .frame(width: 125, height: 45)
+                        .multilineTextAlignment(.center)
+                        .font(.system(size: 25))
+                        
+                        Button {
+                            if (amountToAdd != "") {
+                                waterLevel += stripOfUnit(input: amountToAdd)
+                            }
+                        } label: {
+                            Text("+")
+                                .padding(5)
+                                .frame(width: 30)
+                        }
+                        .buttonStyle(BorderedProminentButtonStyle())
+                        .font(.system(size: 25))
                     }
-                    .buttonStyle(BorderedProminentButtonStyle())
-                    .font(.system(size: 25))
+                    HStack {
+                        Button("\(firstPresetButton)") {
+                            waterLevel += stripOfUnit(input: firstPresetButton)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .frame(width: 81)
+                        
+                        Button("\(secondPresetButton)") {
+                            waterLevel += stripOfUnit(input: secondPresetButton)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .frame(width: 81)
+                        
+                        Button("\(thirdPresetButton)") {
+                            waterLevel += stripOfUnit(input: thirdPresetButton)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .frame(width: 81)
+                    }
                 }
                 Spacer()
             }
@@ -163,7 +191,7 @@ func formatString(input: Double, selection: UnitType) -> String {
     ]
     
     if let conversion = conversionFactors[selection] {
-        if input >= conversion.threshold {
+        if selection == .Ounces || input >= conversion.threshold {
             return String(format: "%3.1f", input / conversion.factor) + conversion.unit
         }
     }
