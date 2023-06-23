@@ -107,6 +107,34 @@ struct ContentView: View {
                 VStack{
                     HStack {
                         Button {
+                            waterLevel += stripOfUnit(input: firstPresetButton)
+                        } label: {
+                            Text("\(firstPresetButton)")
+                                .padding(EdgeInsets(top: 3, leading: 1, bottom: 3, trailing: 1))
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .frame(width: 80)
+                        
+                        Button {
+                            waterLevel += stripOfUnit(input: secondPresetButton)
+                        } label: {
+                            Text("\(secondPresetButton)")
+                                .padding(EdgeInsets(top: 3, leading: 1, bottom: 3, trailing: 1))
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .frame(width: 80)
+                        
+                        Button {
+                            waterLevel += stripOfUnit(input: thirdPresetButton)
+                        } label: {
+                            Text("\(thirdPresetButton)")
+                                .padding(EdgeInsets(top: 3, leading: 1, bottom: 3, trailing: 1))
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .frame(width: 80)
+                    }
+                    HStack {
+                        Button {
                             if (amountToAdd != "") {
                                 waterLevel -= stripOfUnit(input: amountToAdd)
                             }
@@ -115,7 +143,7 @@ struct ContentView: View {
                                 .padding(5)
                                 .frame(width: 30)
                         }
-                        .buttonStyle(BorderedProminentButtonStyle())
+                        .buttonStyle(.borderedProminent)
                         .font(.system(size: 25))
                         
                         TextField(text: $amountToAdd,
@@ -135,27 +163,8 @@ struct ContentView: View {
                                 .padding(5)
                                 .frame(width: 30)
                         }
-                        .buttonStyle(BorderedProminentButtonStyle())
+                        .buttonStyle(.borderedProminent)
                         .font(.system(size: 25))
-                    }
-                    HStack {
-                        Button("\(firstPresetButton)") {
-                            waterLevel += stripOfUnit(input: firstPresetButton)
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .frame(width: 81)
-                        
-                        Button("\(secondPresetButton)") {
-                            waterLevel += stripOfUnit(input: secondPresetButton)
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .frame(width: 81)
-                        
-                        Button("\(thirdPresetButton)") {
-                            waterLevel += stripOfUnit(input: thirdPresetButton)
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .frame(width: 81)
                     }
                 }
                 Spacer()
